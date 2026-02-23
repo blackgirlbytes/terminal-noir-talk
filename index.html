@@ -1,0 +1,2861 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Last Website You'll Ever Visit</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+    <style>
+        /* ===========================================
+           TERMINAL NOIR THEME
+           Dark, cinematic, developer-focused aesthetic
+           JetBrains Mono + Inter | #0a0a0a + #ff3b3b
+           =========================================== */
+
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Colors */
+            --bg: #0a0a0a;
+            --surface: #111111;
+            --accent: #ff2d8a;
+            --accent-glow: rgba(255, 45, 138, 0.3);
+            --accent-dim: rgba(255, 45, 138, 0.15);
+            --text: #e8e8e8;
+            --text-dim: #a0a0a0;
+            --text-mid: #c0c0c0;
+
+            /* Typography */
+            --mono: 'JetBrains Mono', monospace;
+            --sans: 'Inter', sans-serif;
+            --title-size: clamp(2.5rem, 7vw, 6rem);
+            --h2-size: clamp(1.8rem, 4.5vw, 3.5rem);
+            --body-size: clamp(0.85rem, 1.5vw, 1.15rem);
+            --small-size: clamp(0.7rem, 1.2vw, 1rem);
+
+            /* Spacing */
+            --slide-padding: clamp(2rem, 5vw, 6rem);
+            --content-gap: clamp(1rem, 2.5vw, 2.5rem);
+
+            /* Animation */
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+            --duration: 0.7s;
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-snap-type: y mandatory;
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        body {
+            font-family: var(--sans);
+            background: var(--bg);
+            color: var(--text);
+            height: 100%;
+            overflow-x: hidden;
+        }
+
+        /* ===========================================
+           SLIDE BASE
+           Each slide = exact viewport height, no scroll
+           =========================================== */
+        .slide {
+            width: 100vw;
+            height: 100vh;
+            height: 100dvh;
+            scroll-snap-align: start;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            overflow: hidden;
+            padding: var(--slide-padding);
+        }
+
+        .slide-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            max-height: 100%;
+            overflow: hidden;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        /* ===========================================
+           SCANLINE OVERLAY
+           Subtle CRT monitor effect across all slides
+           =========================================== */
+        .slide::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(255, 255, 255, 0.008) 2px,
+                rgba(255, 255, 255, 0.008) 4px
+            );
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        /* ===========================================
+           CORNER DECORATIONS
+           Terminal-style frame corners
+           =========================================== */
+        .corner {
+            position: absolute;
+            width: 40px;
+            height: 40px;
+            border: 1px solid var(--accent);
+            opacity: 0.3;
+            z-index: 1;
+        }
+        .corner.tl { top: 2rem; left: 2rem; border-right: none; border-bottom: none; }
+        .corner.br { bottom: 2rem; right: 2rem; border-left: none; border-top: none; }
+
+        /* ===========================================
+           FLOATING DOTS
+           Ambient red particles
+           =========================================== */
+        .dot {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: var(--accent);
+            border-radius: 50%;
+            box-shadow: 0 0 20px var(--accent-glow);
+            animation: float 6s ease-in-out infinite;
+            z-index: 1;
+        }
+        .dot:nth-child(1) { top: 20%; left: 15%; animation-delay: 0s; }
+        .dot:nth-child(2) { top: 70%; right: 20%; animation-delay: -2s; }
+        .dot:nth-child(3) { bottom: 25%; left: 40%; animation-delay: -4s; }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); opacity: 0.4; }
+            50% { transform: translateY(-20px); opacity: 0.8; }
+        }
+
+        /* ===========================================
+           BLINKING CURSOR
+           Terminal-style block cursor
+           =========================================== */
+        .cursor {
+            display: inline-block;
+            width: 0.6em;
+            height: 1.1em;
+            background: var(--accent);
+            margin-left: 4px;
+            vertical-align: text-bottom;
+            animation: blink 1s step-end infinite;
+            box-shadow: 0 0 12px var(--accent-glow);
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        /* ===========================================
+           TERMINAL PROMPT
+           Monospace command-line style text
+           =========================================== */
+        .prompt {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--text-dim);
+            letter-spacing: 0.05em;
+        }
+
+        .prompt span.accent { color: var(--accent); }
+
+        /* ===========================================
+           SLIDE 1: TITLE SLIDE
+           =========================================== */
+        .title-slide .title {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--title-size);
+            line-height: 1.05;
+            text-align: center;
+            letter-spacing: -0.03em;
+        }
+
+        .title-slide .title .highlight {
+            color: var(--accent);
+            text-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .title-slide .subtitle {
+            font-family: var(--mono);
+            font-size: clamp(1rem, 2.5vw, 1.8rem);
+            color: var(--text-mid);
+            text-align: center;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            margin-top: var(--content-gap);
+        }
+
+        .title-slide .subtitle .strike {
+            position: relative;
+            display: inline-block;
+        }
+
+        .title-slide .subtitle .strike::after {
+            content: '';
+            position: absolute;
+            left: -4px;
+            right: -4px;
+            top: 55%;
+            height: 3px;
+            background: var(--accent);
+            transform: scaleX(0);
+            transform-origin: left;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .title-slide .prompt {
+            margin-bottom: var(--content-gap);
+            text-align: center;
+        }
+
+        /* ===========================================
+           SLIDE 2: THE DEATH OF THE TAB
+           Audience hook with interactive question feel
+           =========================================== */
+        .hook-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .hook-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .hook-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .hook-slide .questions {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.6rem, 1.5vh, 1.2rem);
+        }
+
+        .hook-slide .question {
+            font-family: var(--mono);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            padding-left: clamp(1rem, 2vw, 2rem);
+            border-left: 2px solid var(--accent-dim);
+            line-height: 1.5;
+            transition: all 0.4s var(--ease-out-expo);
+        }
+
+        .hook-slide .question .prompt-char {
+            color: var(--accent);
+            margin-right: 0.5em;
+        }
+
+        .hook-slide .question.active {
+            color: var(--text);
+            border-left-color: var(--accent);
+        }
+
+        /* ===========================================
+           SLIDE 3: STAT SLIDE
+           Big number with supporting context
+           =========================================== */
+        .stat-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .stat-slide .big-number {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: clamp(4rem, 12vw, 10rem);
+            line-height: 1;
+            color: var(--accent);
+            text-shadow: 0 0 60px var(--accent-glow);
+            letter-spacing: -0.04em;
+        }
+
+        .stat-slide .stat-label {
+            font-family: var(--mono);
+            font-size: var(--body-size);
+            color: var(--text-dim);
+            margin-top: clamp(0.25rem, 0.5vh, 0.5rem);
+            letter-spacing: 0.05em;
+        }
+
+        .stat-slide .stat-context {
+            font-family: var(--sans);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            margin-top: var(--content-gap);
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        .stat-slide .stat-context strong {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        /* ===========================================
+           SLIDE 4: CONCEPT SLIDE
+           Two-column comparison with arrow between
+           =========================================== */
+        .concept-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .concept-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .concept-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .concept-columns {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: clamp(1rem, 2vw, 2rem);
+            align-items: center;
+            width: 100%;
+        }
+
+        .concept-card {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: clamp(1rem, 2vw, 2rem);
+        }
+
+        .concept-card.old {
+            opacity: 0.6;
+        }
+
+        .concept-card.new {
+            border-color: var(--accent-dim);
+            box-shadow: 0 0 30px rgba(255, 45, 138, 0.08);
+        }
+
+        .concept-card .card-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            margin-bottom: clamp(0.4rem, 1vh, 0.75rem);
+        }
+
+        .concept-card.new .card-label {
+            color: var(--accent);
+        }
+
+        .concept-card h3 {
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: clamp(1.1rem, 2vw, 1.5rem);
+            margin-bottom: clamp(0.3rem, 0.8vh, 0.6rem);
+        }
+
+        .concept-card p {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.3vw, 1rem);
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        .concept-arrow {
+            font-size: clamp(1.5rem, 3vw, 2.5rem);
+            color: var(--accent);
+            text-shadow: 0 0 20px var(--accent-glow);
+        }
+
+        @media (max-width: 700px) {
+            .concept-columns {
+                grid-template-columns: 1fr;
+                gap: clamp(0.5rem, 1.5vw, 1rem);
+            }
+            .concept-arrow {
+                transform: rotate(90deg);
+                text-align: center;
+            }
+        }
+
+        /* ===========================================
+           SLIDE 5: CONTEXT SWITCHING
+           Narrative slide with terminal-style story
+           =========================================== */
+        .narrative-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .narrative-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .narrative-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .terminal-story {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: clamp(1rem, 2vw, 1.75rem);
+            font-family: var(--mono);
+            font-size: clamp(0.85rem, 1.4vw, 1.05rem);
+            line-height: 1.7;
+            max-width: 800px;
+        }
+
+        .terminal-story .line {
+            color: var(--text-mid);
+            margin-bottom: clamp(0.2rem, 0.5vh, 0.4rem);
+        }
+
+        .terminal-story .line .cmd {
+            color: var(--text);
+        }
+
+        .terminal-story .line .fail {
+            color: var(--accent);
+        }
+
+        .terminal-story .line .dim {
+            color: var(--text-mid);
+        }
+
+        .narrative-slide .punchline {
+            font-family: var(--sans);
+            font-size: var(--body-size);
+            color: var(--text);
+            margin-top: var(--content-gap);
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        .narrative-slide .punchline em {
+            color: var(--accent);
+            font-style: normal;
+            font-weight: 700;
+        }
+
+        /* ===========================================
+           SLIDE 6: HISTORY SLIDE
+           Timeline / era marker with context
+           =========================================== */
+        .history-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .history-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: clamp(0.3rem, 1vh, 0.75rem);
+        }
+
+        .history-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .history-slide .era-tag {
+            display: inline-block;
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            border: 1px solid var(--accent-dim);
+            padding: clamp(0.2rem, 0.5vw, 0.4rem) clamp(0.5rem, 1vw, 1rem);
+            border-radius: 4px;
+            margin-bottom: var(--content-gap);
+            letter-spacing: 0.05em;
+        }
+
+        .history-slide .description {
+            font-family: var(--sans);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        .history-slide .description strong {
+            color: var(--text);
+        }
+
+        /* ===========================================
+           SLIDE 7: QUOTE / CALLOUT SLIDE
+           Big quote with editorial framing
+           =========================================== */
+        .quote-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .quote-block {
+            border-left: 3px solid var(--accent);
+            padding-left: clamp(1rem, 2.5vw, 2rem);
+            margin-bottom: var(--content-gap);
+        }
+
+        .quote-block .quote-text {
+            font-family: var(--sans);
+            font-weight: 300;
+            font-size: clamp(1.1rem, 2.5vw, 1.8rem);
+            line-height: 1.45;
+            color: var(--text);
+            font-style: italic;
+        }
+
+        .quote-block .quote-text .accent {
+            color: var(--accent);
+            font-style: normal;
+            font-weight: 700;
+        }
+
+        .quote-slide .follow-up {
+            font-family: var(--mono);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        /* ===========================================
+           SLIDE 8: EXCEPTION SLIDE
+           Highlight a counter-example
+           =========================================== */
+        .exception-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .exception-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .exception-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .exception-card {
+            background: var(--surface);
+            border: 1px solid var(--accent-dim);
+            border-radius: 8px;
+            padding: clamp(1rem, 2vw, 2rem);
+            max-width: 700px;
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.5rem, 1vh, 0.75rem);
+        }
+
+        .exception-card .card-name {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.3vw, 1.1rem);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .exception-card .card-desc {
+            font-family: var(--sans);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            line-height: 1.6;
+        }
+
+        .exception-card .card-desc strong {
+            color: var(--text);
+        }
+
+        .exception-slide .caveat {
+            font-family: var(--mono);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            margin-top: var(--content-gap);
+            max-width: 700px;
+            line-height: 1.5;
+        }
+
+        .exception-slide .caveat .accent {
+            color: var(--accent);
+        }
+
+        /* ===========================================
+           SLIDE 9: TWO ROADBLOCKS
+           Split problem statement
+           =========================================== */
+        .roadblock-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .roadblock-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .roadblock-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .roadblock-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(0.75rem, 2vw, 1.5rem);
+            width: 100%;
+            max-width: 900px;
+        }
+
+        .roadblock-card {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: clamp(1rem, 2vw, 1.75rem);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.3rem, 0.8vh, 0.6rem);
+        }
+
+        .roadblock-card .card-number {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.1em;
+        }
+
+        .roadblock-card h3 {
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: clamp(1rem, 1.8vw, 1.4rem);
+        }
+
+        .roadblock-card p {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.3vw, 1rem);
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        @media (max-width: 650px) {
+            .roadblock-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===========================================
+           SLIDE 10: TRUST SLIDE
+           The rm -rf risk — why people don't trust agents
+           =========================================== */
+        .trust-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .trust-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .trust-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .trust-slide .terminal-exchange {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: clamp(1rem, 2vw, 1.75rem);
+            font-family: var(--mono);
+            font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+            line-height: 1.8;
+            max-width: 650px;
+            margin-bottom: var(--content-gap);
+        }
+
+        .trust-slide .terminal-exchange .user-msg {
+            color: var(--text-mid);
+        }
+
+        .trust-slide .terminal-exchange .user-msg .label {
+            color: var(--text);
+            font-weight: 700;
+        }
+
+        .trust-slide .terminal-exchange .agent-msg {
+            color: var(--accent);
+            margin-top: clamp(0.3rem, 0.5vh, 0.5rem);
+        }
+
+        .trust-slide .terminal-exchange .agent-msg .label {
+            font-weight: 700;
+        }
+
+        .trust-slide .insight {
+            font-family: var(--sans);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            line-height: 1.6;
+            max-width: 650px;
+        }
+
+        .trust-slide .insight strong {
+            color: var(--text);
+        }
+
+        /* ===========================================
+           SLIDE 11: BIG STATEMENT SLIDE
+           Full-screen centered question
+           =========================================== */
+        .statement-slide .statement-text {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: clamp(1.5rem, 4vw, 3rem);
+            line-height: 1.25;
+            text-align: center;
+            max-width: 900px;
+            letter-spacing: -0.02em;
+        }
+
+        .statement-slide .statement-text .accent {
+            color: var(--accent);
+            text-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .statement-slide .statement-text .dim {
+            color: var(--text-dim);
+        }
+
+        /* ===========================================
+           SLIDE 12: ANSWER SLIDE
+           MCP + MCP Apps introduction
+           =========================================== */
+        .answer-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .answer-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .answer-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .answer-layers {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.5rem, 1.2vh, 0.9rem);
+            max-width: 750px;
+            width: 100%;
+        }
+
+        .answer-layer {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: clamp(0.75rem, 1.5vw, 1.25rem) clamp(1rem, 2vw, 1.5rem);
+            display: flex;
+            align-items: center;
+            gap: clamp(0.75rem, 1.5vw, 1.25rem);
+        }
+
+        .answer-layer.highlight {
+            border-color: var(--accent-dim);
+            box-shadow: 0 0 25px rgba(255, 45, 138, 0.06);
+        }
+
+        .answer-layer .layer-icon {
+            font-family: var(--mono);
+            font-size: clamp(1.2rem, 2vw, 1.6rem);
+            color: var(--accent);
+            flex-shrink: 0;
+            width: clamp(2rem, 3vw, 2.5rem);
+            text-align: center;
+        }
+
+        .answer-layer .layer-text h3 {
+            font-family: var(--sans);
+            font-weight: 700;
+            font-size: clamp(0.9rem, 1.5vw, 1.15rem);
+            margin-bottom: clamp(0.1rem, 0.3vh, 0.25rem);
+        }
+
+        .answer-layer .layer-text p {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            color: var(--text-mid);
+            line-height: 1.4;
+        }
+
+        /* ===========================================
+           SLIDE 13: DEMO SLIDE
+           Visual placeholder for live demo
+           =========================================== */
+        .demo-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .demo-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .demo-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .demo-window {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            max-width: 750px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .demo-window .window-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.75rem, 1.5vw, 1rem);
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .demo-window .window-bar .dot-r { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; }
+        .demo-window .window-bar .dot-y { width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e; }
+        .demo-window .window-bar .dot-g { width: 10px; height: 10px; border-radius: 50%; background: #28c840; }
+        .demo-window .window-bar .window-title {
+            font-family: var(--mono);
+            font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+            color: var(--text-dim);
+            margin-left: 8px;
+        }
+
+        .demo-window .window-body {
+            padding: clamp(1.5rem, 3vw, 3rem);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: clamp(8rem, 20vh, 14rem);
+            gap: clamp(0.5rem, 1vh, 1rem);
+        }
+
+        .demo-window .window-body .demo-label {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.3vw, 1.1rem);
+            color: var(--accent);
+            letter-spacing: 0.05em;
+        }
+
+        .demo-window .window-body .demo-desc {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            color: var(--text-mid);
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        /* ===========================================
+           SLIDE 14: OPEN STANDARD SLIDE
+           Same app, any container
+           =========================================== */
+        .standard-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .standard-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .standard-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .container-flow {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.5rem, 1.5vw, 1.25rem);
+            flex-wrap: wrap;
+            justify-content: center;
+            max-width: 850px;
+        }
+
+        .container-node {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 8px;
+            padding: clamp(0.6rem, 1.2vw, 1rem) clamp(1rem, 1.8vw, 1.5rem);
+            font-family: var(--mono);
+            font-size: clamp(0.85rem, 1.3vw, 1rem);
+            color: var(--text-mid);
+            text-align: center;
+        }
+
+        .container-node.app {
+            border-color: var(--accent-dim);
+            color: var(--accent);
+            font-weight: 700;
+            box-shadow: 0 0 20px rgba(255, 45, 138, 0.08);
+        }
+
+        .container-flow .flow-arrow {
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            color: var(--text-dim);
+            opacity: 0.4;
+        }
+
+        .standard-slide .standard-punchline {
+            font-family: var(--sans);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            margin-top: var(--content-gap);
+            text-align: center;
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .standard-slide .standard-punchline strong {
+            color: var(--text);
+        }
+
+        /* ===========================================
+           SLIDE 15: THE SHIFT SLIDE
+           URL → Tool Call paradigm
+           =========================================== */
+        .shift-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .shift-comparison {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(1rem, 2.5vh, 2rem);
+            max-width: 750px;
+            width: 100%;
+        }
+
+        .shift-row {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.75rem, 2vw, 1.5rem);
+        }
+
+        .shift-row .shift-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            width: clamp(4rem, 8vw, 6rem);
+            flex-shrink: 0;
+        }
+
+        .shift-row.old .shift-label {
+            text-decoration: line-through;
+            opacity: 0.5;
+        }
+
+        .shift-row .shift-value {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            padding: clamp(0.6rem, 1.2vw, 1rem) clamp(1rem, 2vw, 1.5rem);
+            font-family: var(--mono);
+            font-size: clamp(0.85rem, 1.5vw, 1.2rem);
+            flex: 1;
+        }
+
+        .shift-row.old .shift-value {
+            color: var(--text-dim);
+            opacity: 0.5;
+        }
+
+        .shift-row.new .shift-value {
+            border-color: var(--accent-dim);
+            color: var(--accent);
+            font-weight: 700;
+            box-shadow: 0 0 25px rgba(255, 45, 138, 0.08);
+        }
+
+        .shift-row.new .shift-label {
+            color: var(--accent);
+        }
+
+        .shift-divider {
+            width: 100%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--accent-dim), transparent);
+        }
+
+        /* ===========================================
+           SLIDE 16: ANATOMY SLIDE
+           MCP App structure — code-style breakdown
+           =========================================== */
+        .anatomy-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .anatomy-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .anatomy-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .anatomy-list {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.4rem, 1vh, 0.75rem);
+            max-width: 800px;
+            width: 100%;
+        }
+
+        .anatomy-item {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(0.5rem, 1.2vw, 1rem);
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            padding: clamp(0.6rem, 1.2vw, 1rem) clamp(0.75rem, 1.5vw, 1.25rem);
+        }
+
+        .anatomy-item .item-num {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            font-weight: 700;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .anatomy-item .item-text {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        .anatomy-item .item-text code {
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+
+        .anatomy-item .item-text strong {
+            color: var(--text);
+        }
+
+        /* ===========================================
+           SLIDE 17: FLOW SLIDE
+           Numbered vertical flow — 4 steps
+           =========================================== */
+        .flow-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .flow-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .flow-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .flow-steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-width: 700px;
+            width: 100%;
+        }
+
+        .flow-step {
+            display: flex;
+            align-items: center;
+            gap: clamp(0.75rem, 1.5vw, 1.25rem);
+            padding: clamp(0.6rem, 1.2vw, 1rem) 0;
+        }
+
+        .flow-step + .flow-step {
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .flow-step .step-num {
+            font-family: var(--mono);
+            font-size: clamp(1.2rem, 2vw, 1.6rem);
+            color: var(--accent);
+            font-weight: 700;
+            flex-shrink: 0;
+            width: clamp(2rem, 3vw, 2.5rem);
+            text-align: center;
+        }
+
+        .flow-step .step-text {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        .flow-step .step-text strong {
+            color: var(--text);
+        }
+
+        .flow-step .step-text code {
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+
+        /* ===========================================
+           SLIDE 18: PROTOCOL SLIDE
+           How MCP Apps communicate
+           =========================================== */
+        .protocol-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .protocol-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .protocol-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .protocol-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: clamp(0.5rem, 1.2vw, 0.9rem);
+            max-width: 850px;
+            width: 100%;
+        }
+
+        .protocol-card {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+            padding: clamp(0.6rem, 1.2vw, 1rem) clamp(0.75rem, 1.5vw, 1.25rem);
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.15rem, 0.4vh, 0.3rem);
+        }
+
+        .protocol-card .proto-name {
+            font-family: var(--mono);
+            font-size: clamp(0.7rem, 1.1vw, 0.88rem);
+            color: var(--accent);
+            font-weight: 700;
+        }
+
+        .protocol-card .proto-dir {
+            font-family: var(--mono);
+            font-size: clamp(0.65rem, 1vw, 0.8rem);
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .security-item {
+            font-family: var(--mono);
+            font-size: clamp(0.8rem, 1.2vw, 0.95rem);
+            color: var(--text-mid);
+            line-height: 1.4;
+        }
+
+        @media (max-width: 650px) {
+            .protocol-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* ===========================================
+           SLIDE 19: SECURITY CONCERN SLIDE
+           The problem with running foreign HTML
+           =========================================== */
+        .concern-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .concern-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .concern-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .concern-quote {
+            border-left: 3px solid var(--accent);
+            padding-left: clamp(1rem, 2.5vw, 2rem);
+            margin-bottom: var(--content-gap);
+        }
+
+        .concern-quote p {
+            font-family: var(--sans);
+            font-weight: 300;
+            font-size: clamp(1rem, 2vw, 1.5rem);
+            line-height: 1.45;
+            color: var(--text);
+            font-style: italic;
+        }
+
+        .concern-quote p .accent {
+            color: var(--accent);
+            font-style: normal;
+            font-weight: 700;
+        }
+
+        .concern-context {
+            font-family: var(--mono);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            line-height: 1.6;
+            max-width: 700px;
+        }
+
+        /* ===========================================
+           SLIDE 20: SECURITY CONSTRAINTS SLIDE
+           The solution — sandboxing & CSP
+           =========================================== */
+        .security-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .security-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .security-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .security-list {
+            display: flex;
+            flex-direction: column;
+            gap: clamp(0.35rem, 0.8vh, 0.6rem);
+            max-width: 750px;
+            width: 100%;
+        }
+
+        .security-item {
+            display: flex;
+            align-items: flex-start;
+            gap: clamp(0.5rem, 1vw, 0.75rem);
+            font-family: var(--mono);
+            font-size: clamp(0.7rem, 1.1vw, 0.88rem);
+            color: var(--text-mid);
+            line-height: 1.5;
+        }
+
+        .security-item .check {
+            color: var(--accent);
+            flex-shrink: 0;
+            font-weight: 700;
+            margin-top: 1px;
+        }
+
+        .security-item strong {
+            color: var(--text);
+        }
+
+        .security-item code {
+            color: var(--accent);
+            background: var(--accent-dim);
+            padding: 1px 5px;
+            border-radius: 3px;
+            font-size: 0.95em;
+        }
+
+        .security-principle {
+            font-family: var(--sans);
+            font-size: var(--body-size);
+            color: var(--text);
+            margin-top: var(--content-gap);
+            padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.75rem, 1.5vw, 1.25rem);
+            border: 1px solid var(--accent-dim);
+            border-radius: 6px;
+            max-width: 750px;
+        }
+
+        .security-principle em {
+            color: var(--accent);
+            font-style: normal;
+            font-weight: 700;
+        }
+
+        /* ===========================================
+           SLIDE 21: LIVE BUILD SLIDE
+           Let's build one — terminal command + prompt
+           =========================================== */
+        .build-slide .section-label {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--accent);
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .build-slide h2 {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--h2-size);
+            line-height: 1.15;
+            letter-spacing: -0.02em;
+            margin-bottom: var(--content-gap);
+        }
+
+        .build-slide h2 .accent {
+            color: var(--accent);
+            text-shadow: 0 0 30px var(--accent-glow);
+        }
+
+        .build-terminal {
+            background: var(--surface);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            max-width: 700px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .build-terminal .term-bar {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: clamp(0.5rem, 1vw, 0.75rem) clamp(0.75rem, 1.5vw, 1rem);
+            background: rgba(255, 255, 255, 0.03);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+
+        .build-terminal .term-bar .d-r { width: 10px; height: 10px; border-radius: 50%; background: #ff5f57; }
+        .build-terminal .term-bar .d-y { width: 10px; height: 10px; border-radius: 50%; background: #ffbd2e; }
+        .build-terminal .term-bar .d-g { width: 10px; height: 10px; border-radius: 50%; background: #28c840; }
+        .build-terminal .term-bar .term-title {
+            font-family: var(--mono);
+            font-size: clamp(0.6rem, 0.9vw, 0.75rem);
+            color: var(--text-dim);
+            margin-left: 8px;
+        }
+
+        .build-terminal .term-body {
+            padding: clamp(1rem, 2vw, 1.75rem);
+            font-family: var(--mono);
+            font-size: clamp(0.85rem, 1.4vw, 1.1rem);
+            line-height: 2;
+        }
+
+        .build-terminal .term-body .term-line {
+            color: var(--text-mid);
+        }
+
+        .build-terminal .term-body .term-line .term-prompt {
+            color: var(--accent);
+        }
+
+        .build-terminal .term-body .term-line .term-cmd {
+            color: var(--text);
+        }
+
+        .build-terminal .term-body .term-line .term-comment {
+            color: var(--text-mid);
+        }
+
+        .build-slide .build-note {
+            font-family: var(--mono);
+            font-size: var(--small-size);
+            color: var(--text-dim);
+            margin-top: var(--content-gap);
+            text-align: center;
+            max-width: 700px;
+        }
+
+        /* ===========================================
+           SLIDE 22: CLOSING STATEMENT
+           The tab isn't dying because...
+           =========================================== */
+        .closing-slide .closing-text {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: clamp(1.3rem, 3.5vw, 2.5rem);
+            line-height: 1.35;
+            max-width: 900px;
+            letter-spacing: -0.02em;
+        }
+
+        .closing-slide .closing-text .accent {
+            color: var(--accent);
+            text-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .closing-slide .closing-text .dim {
+            color: var(--text-dim);
+        }
+
+        .closing-slide .closing-sub {
+            font-family: var(--mono);
+            font-size: var(--body-size);
+            color: var(--text-mid);
+            margin-top: var(--content-gap);
+            max-width: 700px;
+            line-height: 1.6;
+        }
+
+        .closing-slide .closing-sub strong {
+            color: var(--text);
+        }
+
+        /* ===========================================
+           SLIDE 23: THANK YOU / Q&A
+           Final slide with blinking cursor
+           =========================================== */
+        .end-slide .end-title {
+            font-family: var(--sans);
+            font-weight: 900;
+            font-size: var(--title-size);
+            text-align: center;
+            letter-spacing: -0.03em;
+            margin-bottom: clamp(0.5rem, 1.5vh, 1rem);
+        }
+
+        .end-slide .end-prompt {
+            font-family: var(--mono);
+            font-size: clamp(0.85rem, 1.5vw, 1.15rem);
+            color: var(--text-dim);
+            text-align: center;
+            letter-spacing: 0.05em;
+        }
+
+        .end-slide .end-prompt .accent {
+            color: var(--accent);
+        }
+
+        /* ===========================================
+           REVEAL ANIMATIONS
+           Triggered by Intersection Observer
+           =========================================== */
+        .reveal {
+            opacity: 0;
+            transform: translateY(25px);
+            transition: opacity var(--duration) var(--ease-out-expo),
+                        transform var(--duration) var(--ease-out-expo);
+        }
+
+        .slide.visible .reveal {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .slide.visible .reveal:nth-child(1) { transition-delay: 0.1s; }
+        .slide.visible .reveal:nth-child(2) { transition-delay: 0.25s; }
+        .slide.visible .reveal:nth-child(3) { transition-delay: 0.4s; }
+        .slide.visible .reveal:nth-child(4) { transition-delay: 0.55s; }
+
+        /* Title slide strikethrough triggers on visible */
+        .title-slide.visible .subtitle .strike::after {
+            animation: strikeThrough 0.6s ease forwards 1.2s;
+        }
+
+        @keyframes strikeThrough {
+            to { transform: scaleX(1); }
+        }
+
+        /* ===========================================
+           NAVIGATION
+           Dots on the right edge + progress bar
+           =========================================== */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: var(--accent);
+            box-shadow: 0 0 10px var(--accent-glow);
+            z-index: 100;
+            transition: width 0.3s ease;
+        }
+
+        .nav-dots {
+            position: fixed;
+            right: clamp(1rem, 2vw, 2rem);
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            z-index: 100;
+        }
+
+        .nav-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-dim);
+            opacity: 0.3;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            padding: 0;
+        }
+
+        .nav-dot.active {
+            background: var(--accent);
+            opacity: 1;
+            box-shadow: 0 0 10px var(--accent-glow);
+        }
+
+        .nav-dot:hover {
+            opacity: 0.8;
+            transform: scale(1.3);
+        }
+
+        .keyboard-hint {
+            position: fixed;
+            bottom: clamp(1rem, 2vh, 2rem);
+            left: 50%;
+            transform: translateX(-50%);
+            font-family: var(--mono);
+            font-size: clamp(0.6rem, 0.8vw, 0.75rem);
+            color: var(--text-dim);
+            opacity: 0.4;
+            z-index: 100;
+            letter-spacing: 0.1em;
+        }
+
+        /* ===========================================
+           RESPONSIVE BREAKPOINTS
+           =========================================== */
+        @media (max-height: 700px) {
+            :root {
+                --slide-padding: clamp(1.5rem, 4vw, 3rem);
+                --content-gap: clamp(0.75rem, 2vw, 1.5rem);
+                --title-size: clamp(2rem, 6vw, 4rem);
+                --h2-size: clamp(1.5rem, 4vw, 2.5rem);
+            }
+        }
+
+        @media (max-height: 600px) {
+            :root {
+                --slide-padding: clamp(1rem, 3vw, 2rem);
+                --content-gap: clamp(0.5rem, 1.5vw, 1rem);
+                --title-size: clamp(1.5rem, 5vw, 3rem);
+                --h2-size: clamp(1.25rem, 3.5vw, 2rem);
+                --body-size: clamp(0.75rem, 1.2vw, 0.95rem);
+            }
+
+            .nav-dots, .keyboard-hint, .decorative {
+                display: none;
+            }
+        }
+
+        @media (max-height: 500px) {
+            :root {
+                --slide-padding: clamp(0.75rem, 2.5vw, 1.5rem);
+                --title-size: clamp(1.25rem, 4.5vw, 2.5rem);
+                --h2-size: clamp(1rem, 3vw, 1.75rem);
+                --body-size: clamp(0.7rem, 1vw, 0.85rem);
+            }
+        }
+
+        @media (max-width: 600px) {
+            :root {
+                --title-size: clamp(1.8rem, 9vw, 3.5rem);
+            }
+
+            .corner { display: none; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.2s !important;
+            }
+            html { scroll-behavior: auto; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Progress bar -->
+    <div class="progress-bar" id="progress"></div>
+
+    <!-- Navigation dots -->
+    <nav class="nav-dots" id="navDots"></nav>
+
+    <!-- Keyboard hint -->
+    <div class="keyboard-hint">← → or scroll to navigate · press P for presenter view</div>
+
+    <!-- =========================================
+         SLIDE 1: TITLE
+         "The Last Website You'll Ever Visit"
+         ========================================= -->
+    <section class="slide title-slide" data-slide="0" data-notes="Welcome everyone. This talk is about the death of the browser tab as we know it — and what replaces it. I'm going to make the case that the last website you'll ever visit... won't be in a browser at all.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content" style="align-items: center; text-align: center;">
+            <div class="prompt reveal">
+                <span class="accent">$</span> rm -rf ./browser-tabs<span class="cursor"></span>
+            </div>
+
+            <h1 class="title reveal">
+                The Last Website<br>
+                You'll Ever <span class="accent">Visit</span>
+            </h1>
+
+            <p class="subtitle reveal"><span class="strike">in the Browser</span></p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 2: THE DEATH OF THE TAB
+         Audience hook — raise your hand questions
+         ========================================= -->
+    <section class="slide hook-slide" data-slide="1" data-notes="Let's start with a quick pulse check. How many of you still go to Stack Overflow regularly? [pause] Now how many of you skip Google entirely and just ask an AI agent? That shift — that's what this talk is about.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">01 — Introduction</div>
+
+            <h2 class="reveal">The Death of <span class="accent">the Tab</span></h2>
+
+            <div class="questions reveal">
+                <div class="question active">
+                    <span class="prompt-char">›</span> How many of you still go to Stack Overflow?
+                </div>
+                <div class="question">
+                    <span class="prompt-char">›</span> Now, how many of you skip Google entirely and just ask an AI agent?
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 3: THE STATS
+         Stack Overflow's 98% traffic collapse
+         ========================================= -->
+    <section class="slide stat-slide" data-slide="2" data-notes="Here's the hard number. Stack Overflow lost 98% of its traffic. By December 2025, daily questions dropped under 4,000. Developers chose speed over community. The browser tab for Q&A is effectively dead.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">01 — Introduction</div>
+
+            <div class="big-number reveal">−98%</div>
+            <div class="stat-label reveal">Stack Overflow traffic since 2022</div>
+
+            <p class="stat-context reveal">
+                By December 2025, daily questions dropped to <strong>under 4,000</strong>.
+                Developers chose <strong>speed over community</strong>.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 4: NAVIGATION → INTENT
+         The paradigm shift explained
+         ========================================= -->
+    <section class="slide concept-slide" data-slide="3" data-notes="This is the fundamental shift. We went from a Navigation Web — where you click through links and tabs to find answers — to an Intent Web, where you just state what you need and the answer comes to you. No tabs required.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">01 — Introduction</div>
+
+            <h2 class="reveal">From Navigation to <span class="accent">Intent</span></h2>
+
+            <div class="concept-columns reveal">
+                <div class="concept-card old">
+                    <div class="card-label">Before</div>
+                    <h3>Navigation Web</h3>
+                    <p>Click through tabs.<br>Search → Link → Page → Answer.</p>
+                </div>
+
+                <div class="concept-arrow">→</div>
+
+                <div class="concept-card new">
+                    <div class="card-label">Now</div>
+                    <h3>Intent Web</h3>
+                    <p>The answer comes to you.<br>Ask → Answer. No tabs.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 5: CONTEXT SWITCHING
+         The rabbit hole problem
+         ========================================= -->
+    <section class="slide narrative-slide" data-slide="4" data-notes="We've all been here. You start with a simple CSS bug, open Stack Overflow, click a related link, three tabs deep, and suddenly you're on TikTok. [pause for laughs] Your agent already has your codebase. It's just easier to ask it directly than risk the rabbit hole.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">01 — Introduction</div>
+
+            <h2 class="reveal">Context Switching is the <span class="accent">Silent Killer</span></h2>
+
+            <div class="terminal-story reveal">
+                <div class="line"><span class="dim">$</span> <span class="cmd">search "fix css grid bug"</span></div>
+                <div class="line"><span class="dim">→</span> open Stack Overflow</div>
+                <div class="line"><span class="dim">→</span> see related link...</div>
+                <div class="line"><span class="dim">→</span> three tabs deep...</div>
+                <div class="line"><span class="dim">→</span> ten minutes later...</div>
+                <div class="line"><span class="fail">→ scrolling TikTok</span></div>
+            </div>
+
+            <p class="punchline reveal">
+                Your agent already has your codebase. It's easier to say <em>"hey, why is this breaking?"</em> than to leave your IDE and risk the rabbit hole.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 6: HISTORY
+         Conversational Marketing circa 2018
+         ========================================= -->
+    <section class="slide history-slide" data-slide="5" data-notes="This isn't a new panic. Back in 2018, PMs were terrified of people leaving their sites. Their answer was Conversational Marketing — chatbots designed to keep users engaged on-page. Sound familiar?">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">02 — History</div>
+
+            <h2 class="reveal">From Marketing Gimmicks to <span class="accent">Utility</span></h2>
+
+            <div class="era-tag reveal">circa 2018</div>
+
+            <p class="description reveal">
+                This isn't the first "decline" in browsing. PMs were terrified of people leaving their sites. Their solution? <strong>Conversational Marketing</strong> — chatbots that would keep users engaged and on-page.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 7: THE REALITY CHECK
+         Chatbots were rebranded pop-up ads
+         ========================================= -->
+    <section class="slide quote-slide" data-slide="6" data-notes="[Deliver with comedic timing] They literally took the old 'single girls in your area' pop-up ads and rebranded them as chatbots. A stock photo of Sarah asking if you want a demo of a Kubernetes dashboard. Built for metrics, not users.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">02 — History</div>
+
+            <div class="quote-block reveal">
+                <p class="quote-text">
+                    PMs took the old <span class="accent">"single girls in your area"</span> pop-up ads and rebranded them as chatbots.
+                </p>
+            </div>
+
+            <p class="follow-up reveal">
+                A stock photo of "Sarah" asking if you want a demo of a Kubernetes dashboard while you're just trying to find the pricing page. Built for metrics, not users.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 8: THE EXCEPTION
+         Erica from Bank of America
+         ========================================= -->
+    <section class="slide exception-slide" data-slide="7" data-notes="But there was one exception that actually worked — Erica from Bank of America. No navigating five menus. You just ask. That's a glimpse of the intent-based web. The problem? Erica is stuck on a specific URL. You still have to go to the site.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">02 — History</div>
+
+            <h2 class="reveal">The Exception: <span class="accent">Erica</span></h2>
+
+            <div class="exception-card reveal">
+                <div class="card-name">Erica — Bank of America</div>
+                <p class="card-desc">
+                    No navigating five menus to find your account number. <strong>You just ask.</strong> That's a glimpse of the intent-based web.
+                </p>
+            </div>
+
+            <p class="caveat reveal">
+                The problem? Erica is <span class="accent">stuck on a specific URL</span>. To get things done, we still have to go to the site.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 9: TWO ROADBLOCKS
+         The problem for Creators & Users
+         ========================================= -->
+    <section class="slide roadblock-slide" data-slide="8" data-notes="So we have two roadblocks. For creators: nobody's visiting your site anymore — users stay inside the agent. For users: AI is non-deterministic. There's a massive mismatch between intent and interpretation.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">03 — The Problem</div>
+
+            <h2 class="reveal">Two <span class="accent">Roadblocks</span></h2>
+
+            <div class="roadblock-grid reveal">
+                <div class="roadblock-card">
+                    <div class="card-number">01 — Creators</div>
+                    <h3>Nobody's visiting your site</h3>
+                    <p>Users stay inside the agent. Your traffic, your funnel, your analytics — gone.</p>
+                </div>
+
+                <div class="roadblock-card">
+                    <div class="card-number">02 — Users</div>
+                    <h3>AI is non-deterministic</h3>
+                    <p>Massive mismatch between intent and interpretation. You say "remove that part" — agent runs rm -rf.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 10: THE rm -rf RISK
+         Trust & control problem
+         ========================================= -->
+    <section class="slide trust-slide" data-slide="9" data-notes="Here's the trust problem in action. You say 'can we remove that part?' and the agent runs rm -rf on your entire project. This is why people don't trust agents to buy plane tickets yet. We want to click the final button. We want UI control with agent speed.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">03 — The Problem</div>
+
+            <h2 class="reveal">The <span class="accent">rm -rf</span> Risk</h2>
+
+            <div class="terminal-exchange reveal">
+                <div class="user-msg"><span class="label">You:</span> "Can we remove that part?"</div>
+                <div class="agent-msg"><span class="label">Agent:</span> $ rm -rf ./entire-project</div>
+            </div>
+
+            <p class="insight reveal">
+                This is why people don't trust agents to buy plane tickets or choose a T-shirt yet. We want to <strong>click the final button</strong>. We want the control of a UI with the speed of an agent.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 11: THE REAL QUESTION
+         Big centered statement
+         ========================================= -->
+    <section class="slide statement-slide" data-slide="10" data-notes="[Let this breathe — pause after reading it] This is the core question of the talk. If users are living inside agents, how do we bring interface and control to them without forcing them back into the browser?">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content" style="align-items: center; text-align: center;">
+            <p class="statement-text reveal">
+                <span class="dim">If users are living inside agents,</span><br>
+                how do we bring <span class="accent">interface and control</span> to them<br>
+                <span class="dim">without forcing them back into the browser?</span>
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 12: MCP + MCP APPS
+         The answer — layered explanation
+         ========================================= -->
+    <section class="slide answer-slide" data-slide="11" data-notes="The answer is MCP plus MCP Apps. MCP gives agents contextual superpowers — tools and resources. MCP Apps take it further: they bring a fully interactive UI into the agent itself. The result? Instead of visiting a website, the interface renders inside the agent.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">04 — The Solution</div>
+
+            <h2 class="reveal">MCP + <span class="accent">MCP Apps</span></h2>
+
+            <div class="answer-layers reveal">
+                <div class="answer-layer">
+                    <div class="layer-icon">⚡</div>
+                    <div class="layer-text">
+                        <h3>MCP</h3>
+                        <p>Gives agents contextual superpowers. Interact with tools directly.</p>
+                    </div>
+                </div>
+
+                <div class="answer-layer highlight">
+                    <div class="layer-icon">◻</div>
+                    <div class="layer-text">
+                        <h3>MCP Apps</h3>
+                        <p>Bring a fully interactive UI into the agent itself. No browser needed.</p>
+                    </div>
+                </div>
+
+                <div class="answer-layer">
+                    <div class="layer-icon">→</div>
+                    <div class="layer-text">
+                        <h3>The Result</h3>
+                        <p>Instead of visiting a website, the interface renders inside the agent.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 13: DEMO TIME
+         Excalidraw MCP App inside Goose
+         ========================================= -->
+    <section class="slide demo-slide" data-slide="12" data-notes="[SWITCH TO LIVE DEMO] Let me show you what this looks like. I'm going to invoke Excalidraw as an MCP App directly inside Goose. Watch — the UI renders inline. I can interact with it. I never opened a new tab.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content" style="align-items: center;">
+            <div class="section-label reveal">04 — The Solution</div>
+
+            <h2 class="reveal" style="text-align: center;">Demo: <span class="accent">Excalidraw in Goose</span></h2>
+
+            <div class="demo-window reveal">
+                <div class="window-bar">
+                    <div class="dot-r"></div>
+                    <div class="dot-y"></div>
+                    <div class="dot-g"></div>
+                    <span class="window-title">goose — session</span>
+                </div>
+                <div class="window-body">
+                    <div class="demo-label">[ LIVE DEMO ]</div>
+                    <div class="demo-desc">
+                        Invoke an MCP App like Excalidraw directly inside Goose.<br>
+                        The UI renders inline. Interact with it. Never open a new tab.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 14: ONE APP, ANY CONTAINER
+         Open standard — same app across platforms
+         ========================================= -->
+    <section class="slide standard-slide" data-slide="13" data-notes="And here's the beautiful part — because MCP is an open standard, the same Excalidraw app works in Goose, ChatGPT, Claude, any agent that supports MCP. The container changes. The app does not. Build once, run everywhere.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content" style="align-items: center;">
+            <div class="section-label reveal">04 — The Solution</div>
+
+            <h2 class="reveal" style="text-align: center;">One App, <span class="accent">Any Container</span></h2>
+
+            <div class="container-flow reveal">
+                <div class="container-node app">Excalidraw<br>MCP App</div>
+                <div class="flow-arrow">→</div>
+                <div class="container-node">Goose</div>
+                <div class="flow-arrow">→</div>
+                <div class="container-node">ChatGPT</div>
+                <div class="flow-arrow">→</div>
+                <div class="container-node">Claude</div>
+                <div class="flow-arrow">→</div>
+                <div class="container-node">Any Agent</div>
+            </div>
+
+            <p class="standard-punchline reveal">
+                Because it's an <strong>open standard</strong>, the container changes. The app does not.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 15: THE SHIFT
+         URL → Tool Call
+         ========================================= -->
+    <section class="slide shift-slide" data-slide="14" data-notes="This is the paradigm shift in one slide. Before, the URL was the entry point. Now, the tool call is the entry point. You don't navigate to an app — you invoke it.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">04 — The Solution</div>
+
+            <div class="shift-comparison reveal">
+                <div class="shift-row old">
+                    <div class="shift-label">Before</div>
+                    <div class="shift-value">The URL was the entry point</div>
+                </div>
+
+                <div class="shift-divider"></div>
+
+                <div class="shift-row new">
+                    <div class="shift-label">Now</div>
+                    <div class="shift-value">The tool call is the entry point</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 16: ANATOMY OF AN MCP APP
+         Server structure breakdown
+         ========================================= -->
+    <section class="slide anatomy-slide" data-slide="15" data-notes="Let's break down what an MCP App actually is. Step 1: create a normal MCP server with tools and resources. Step 2: a tool responds with a ui:// resource URI. Step 3: that resource returns HTML with a special MIME type. Step 4: it's just a regular web page — vanilla HTML/CSS/JS.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">05 — How It Works</div>
+
+            <h2 class="reveal">Anatomy of an <span class="accent">MCP App</span></h2>
+
+            <div class="anatomy-list reveal">
+                <div class="anatomy-item">
+                    <div class="item-num">01</div>
+                    <div class="item-text">Create a normal <strong>MCP server</strong> with two key capabilities: <code>tools</code> and <code>resources</code></div>
+                </div>
+                <div class="anatomy-item">
+                    <div class="item-num">02</div>
+                    <div class="item-text">A tool (e.g. <code>show_demo_app</code>) responds with <code>_meta.ui.resourceUri</code> pointing to a <code>ui://</code> URI</div>
+                </div>
+                <div class="anatomy-item">
+                    <div class="item-num">03</div>
+                    <div class="item-text">A resource at that URI returns HTML with MIME type <code>text/html;profile=mcp-app</code></div>
+                </div>
+                <div class="anatomy-item">
+                    <div class="item-num">04</div>
+                    <div class="item-text">The HTML is a <strong>regular web page</strong> — vanilla HTML/CSS/JS, no special framework needed</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 17: THE FLOW
+         4 steps from user to rendered app
+         ========================================= -->
+    <section class="slide flow-slide" data-slide="16" data-notes="Here's the full flow. User asks for something. Goose calls the MCP tool. Server responds with a ui:// URI. Goose fetches the HTML and renders it in a sandboxed iframe. The app communicates back via postMessage using JSON-RPC. Simple, secure, standard.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">05 — How It Works</div>
+
+            <h2 class="reveal">The <span class="accent">Flow</span></h2>
+
+            <div class="flow-steps reveal">
+                <div class="flow-step">
+                    <div class="step-num">1</div>
+                    <div class="step-text">User says something like <strong>"show me the demo app"</strong></div>
+                </div>
+                <div class="flow-step">
+                    <div class="step-num">2</div>
+                    <div class="step-text">Goose calls the MCP tool → server responds with a <code>ui://</code> resource URI</div>
+                </div>
+                <div class="flow-step">
+                    <div class="step-num">3</div>
+                    <div class="step-text">Goose fetches the HTML from that resource and renders it in a <strong>sandboxed iframe</strong></div>
+                </div>
+                <div class="flow-step">
+                    <div class="step-num">4</div>
+                    <div class="step-text">The app communicates back via <code>window.postMessage</code> using <strong>JSON-RPC</strong></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 18: PROTOCOLS
+         How MCP Apps talk to Goose
+         ========================================= -->
+    <section class="slide protocol-slide" data-slide="17" data-notes="Four key protocols. ui/initialize — app calls on load to get context. ui/message — app sends a message back into the chat. host-context-changed — Goose pushes theme changes to the app. size-changed — app tells Goose its height for dynamic resizing.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">05 — How It Works</div>
+
+            <h2 class="reveal">How MCP Apps Talk to <span class="accent">Goose</span></h2>
+
+            <div class="protocol-grid reveal">
+                <div class="protocol-card">
+                    <div class="proto-name">ui/initialize</div>
+                    <div class="proto-dir">App → Host</div>
+                    <div class="proto-desc">App calls on load to get host context (theme, window size)</div>
+                </div>
+
+                <div class="protocol-card">
+                    <div class="proto-name">ui/message</div>
+                    <div class="proto-dir">App → Host</div>
+                    <div class="proto-desc">App sends a message back into the chat (user intent → agent)</div>
+                </div>
+
+                <div class="protocol-card">
+                    <div class="proto-name">ui/notifications/host-context-changed</div>
+                    <div class="proto-dir">Host → App</div>
+                    <div class="proto-desc">Goose pushes theme changes (dark mode, light mode) to the app</div>
+                </div>
+
+                <div class="protocol-card">
+                    <div class="proto-name">ui/notifications/size-changed</div>
+                    <div class="proto-dir">App → Host</div>
+                    <div class="proto-desc">App tells Goose its height so the iframe resizes dynamically</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 19: SECURITY CONCERNS
+         The problem with running foreign HTML
+         ========================================= -->
+    <section class="slide concern-slide" data-slide="18" data-notes="Now the elephant in the room. Running someone else's HTML inside your desktop app is basically saying 'here, execute this code on my machine.' The original experiment was called MCP-UI and everyone raised concerns — malicious scripts, data exfiltration, all from inside your chat window.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">06 — Security</div>
+
+            <h2 class="reveal">The <span class="accent">Elephant</span> in the Room</h2>
+
+            <div class="concern-quote reveal">
+                <p>Running someone else's HTML inside your desktop app is basically saying <span class="accent">"here, execute this code on my machine."</span></p>
+            </div>
+
+            <p class="concern-context reveal">
+                The original experiment was called MCP-UI. Everyone raised concerns: malicious scripts, data exfiltration, all from inside your chat window.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 20: SECURITY CONSTRAINTS
+         The solution — sandboxing & CSP
+         ========================================= -->
+    <section class="slide security-slide" data-slide="19" data-notes="Here's how we solve it. Apps run in a sandboxed iframe with strict CSP. Same-origin only by default. No external network, no nested iframes. You explicitly allowlist domains you trust. The principle: deny by default, allowlist explicitly.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <div class="section-label reveal">06 — Security</div>
+
+            <h2 class="reveal">Security <span class="accent">Constraints</span></h2>
+
+            <div class="security-list reveal">
+                <div class="security-item">
+                    <span class="check">✓</span>
+                    <span>Apps run in a <strong>sandboxed iframe</strong> with a strict Content Security Policy</span>
+                </div>
+                <div class="security-item">
+                    <span class="check">✓</span>
+                    <span>By default: <strong>same-origin only</strong>, no external network, no nested iframes</span>
+                </div>
+                <div class="security-item">
+                    <span class="check">✓</span>
+                    <span>Explicitly allowlist domains for fetch, CDN resources, or embedded iframes via a <code>csp</code> config</span>
+                </div>
+                <div class="security-item">
+                    <span class="check">✓</span>
+                    <span>Only add domains you trust — <strong>keep the list minimal</strong></span>
+                </div>
+            </div>
+
+            <div class="security-principle reveal">
+                Principle: <em>deny by default, allowlist explicitly.</em>
+            </div>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 21: LET'S BUILD ONE
+         Live coding with the MCP App agent skill
+         ========================================= -->
+    <section class="slide build-slide" data-slide="20" data-notes="[SWITCH TO LIVE CODING] Alright, let's build one together. Two commands: add the MCP app skill, then prompt Goose to build your app. It's that simple. Let me show you...">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content" style="align-items: center;">
+            <div class="section-label reveal">07 — Let's Build</div>
+
+            <h2 class="reveal" style="text-align: center;">Let's <span class="accent">Build One</span></h2>
+
+            <div class="build-terminal reveal">
+                <div class="term-bar">
+                    <div class="d-r"></div>
+                    <div class="d-y"></div>
+                    <div class="d-g"></div>
+                    <span class="term-title">terminal</span>
+                </div>
+                <div class="term-body">
+                    <div class="term-line"><span class="term-comment"># add the mcp app agent skill</span></div>
+                    <div class="term-line"><span class="term-prompt">$</span> <span class="term-cmd">npx skills add modelcontextprotocol/ext-apps</span></div>
+                    <div class="term-line">&nbsp;</div>
+                    <div class="term-line"><span class="term-comment"># then prompt goose to build your app</span></div>
+                    <div class="term-line"><span class="term-prompt">$</span> <span class="term-cmd">goose</span></div>
+                    <div class="term-line"><span class="term-prompt">›</span> <span class="term-cmd">build me an MCP app that...</span><span class="cursor"></span></div>
+                </div>
+            </div>
+
+            <p class="build-note reveal">[ LIVE DEMO ]</p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 22: CLOSING STATEMENT
+         The tab isn't dying because we stopped
+         needing interfaces
+         ========================================= -->
+    <section class="slide closing-slide" data-slide="21" data-notes="[Slow down, let this land] The tab isn't dying because we stopped needing interfaces. It's dying because the interface now comes to us. The URL is no longer the destination — it's a tool call. You're not building for the browser anymore. You're building for the agentic web.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content">
+            <p class="closing-text reveal">
+                The tab isn't dying because we stopped needing interfaces.<br>
+                <span class="accent">It's dying because the interface now comes to us.</span>
+            </p>
+
+            <p class="closing-sub reveal">
+                The URL is no longer the destination — <strong>it's a tool call</strong>. And with MCP Apps, you're not just building for the browser anymore. You're building for the <strong>agentic web</strong>.
+            </p>
+        </div>
+    </section>
+
+    <!-- =========================================
+         SLIDE 23: THANK YOU / Q&A
+         Final slide
+         ========================================= -->
+    <section class="slide end-slide" data-slide="22" data-notes="Thank you! I'd love to take questions. If you want to try building an MCP App yourself, check out the goose docs and the MCP Apps spec.">
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="corner tl"></div>
+        <div class="corner br"></div>
+
+        <div class="slide-content" style="align-items: center; text-align: center;">
+            <h2 class="end-title reveal">Thank You</h2>
+
+            <div class="end-prompt reveal">
+                <span class="accent">$</span> questions<span class="cursor"></span>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===========================================
+         PRESENTATION CONTROLLER
+         Handles navigation, animations, progress
+         =========================================== -->
+    <script>
+        class SlidePresentation {
+            constructor() {
+                this.slides = document.querySelectorAll('.slide');
+                this.currentSlide = 0;
+                this.totalSlides = this.slides.length;
+                this.isTransitioning = false;
+                this.isPresenterView = new URLSearchParams(window.location.search).has('presenter');
+                this.channel = new BroadcastChannel('slide-sync');
+
+                if (this.isPresenterView) {
+                    this.initPresenterView();
+                } else {
+                    this.createNavDots();
+                    this.setupIntersectionObserver();
+                    this.setupKeyboardNav();
+                    this.setupWheelNav();
+                    this.setupTouchNav();
+                    this.updateProgress();
+                    this.setupChannelListener();
+                }
+            }
+
+            /* ==========================================
+               BROADCAST CHANNEL SYNC
+               ========================================== */
+
+            broadcastSlide(index) {
+                this.channel.postMessage({ type: 'slide', index });
+            }
+
+            setupChannelListener() {
+                this.channel.onmessage = (e) => {
+                    if (e.data.type === 'slide') {
+                        this.goToSlide(e.data.index, false);
+                    }
+                };
+            }
+
+            /* ==========================================
+               PRESENTER VIEW
+               ========================================== */
+
+            initPresenterView() {
+                const originalCSS = document.querySelector('style')?.textContent || '';
+                this.pvOriginalCSS = originalCSS;
+
+                const slideData = Array.from(this.slides).map(s => ({
+                    html: s.outerHTML,
+                    notes: s.dataset.notes || ''
+                }));
+
+                document.body.innerHTML = '';
+                document.body.style.cssText = 'margin:0; background:#0a0a0a; color:#e8e8e8; font-family:Inter,sans-serif; overflow:hidden; height:100vh;';
+
+                document.body.innerHTML = `
+                    <style>
+                        .pv { display:grid; grid-template-columns:1fr 1fr; grid-template-rows:auto 1fr auto; height:100vh; gap:0; }
+                        .pv-header { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding:12px 24px; background:#111; border-bottom:1px solid #222; }
+                        .pv-header h1 { font-family:'JetBrains Mono',monospace; font-size:14px; color:#ff2d8a; margin:0; }
+                        .pv-header .pv-meta { display:flex; gap:24px; align-items:center; font-family:'JetBrains Mono',monospace; font-size:13px; color:#888; }
+                        .pv-timer { color:#ff2d8a !important; font-variant-numeric:tabular-nums; }
+                        .pv-clock { font-variant-numeric:tabular-nums; }
+
+                        .pv-current-wrap { position:relative; padding:16px; display:flex; flex-direction:column; gap:8px; }
+                        .pv-label { font-family:'JetBrains Mono',monospace; font-size:11px; color:#666; text-transform:uppercase; letter-spacing:0.1em; }
+                        .pv-slide-frame { flex:1; border:2px solid #ff2d8a; border-radius:8px; overflow:hidden; position:relative; background:#0a0a0a; }
+                        .pv-slide-frame iframe { width:100%; height:100%; border:none; pointer-events:none; }
+
+                        .pv-notes-panel { padding:16px; display:flex; flex-direction:column; gap:8px; border-left:1px solid #222; overflow:hidden; }
+                        .pv-notes { flex:1; overflow-y:auto; font-size:18px; line-height:1.7; color:#d0d0d0; padding:8px 12px; background:#111; border-radius:8px; }
+                        .pv-notes::-webkit-scrollbar { width:6px; }
+                        .pv-notes::-webkit-scrollbar-track { background:#111; }
+                        .pv-notes::-webkit-scrollbar-thumb { background:#333; border-radius:3px; }
+
+                        .pv-bottom { grid-column:1/-1; display:flex; align-items:center; justify-content:space-between; padding:12px 24px; background:#111; border-top:1px solid #222; }
+                        .pv-nav { display:flex; gap:12px; align-items:center; }
+                        .pv-btn { background:#222; border:1px solid #333; color:#e8e8e8; padding:8px 20px; border-radius:6px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:13px; transition:all 0.2s; }
+                        .pv-btn:hover { background:#ff2d8a; border-color:#ff2d8a; color:#fff; }
+                        .pv-btn:active { transform:scale(0.96); }
+                        .pv-slide-count { font-family:'JetBrains Mono',monospace; font-size:14px; color:#888; min-width:80px; text-align:center; }
+
+                        .pv-next-wrap { display:flex; flex-direction:column; gap:4px; align-items:flex-end; }
+                        .pv-next-label { font-family:'JetBrains Mono',monospace; font-size:11px; color:#666; text-transform:uppercase; letter-spacing:0.1em; }
+                        .pv-next-frame { width:200px; height:120px; border:1px solid #333; border-radius:6px; overflow:hidden; background:#0a0a0a; }
+                        .pv-next-frame iframe { width:100%; height:100%; border:none; pointer-events:none; }
+
+                        .pv-timer-controls { display:flex; gap:8px; }
+                        .pv-timer-btn { background:none; border:1px solid #333; color:#888; width:28px; height:28px; border-radius:4px; cursor:pointer; font-size:14px; display:flex; align-items:center; justify-content:center; transition:all 0.2s; }
+                        .pv-timer-btn:hover { border-color:#ff2d8a; color:#ff2d8a; }
+                    </style>
+                    <div class="pv">
+                        <div class="pv-header">
+                            <h1>⌘ PRESENTER VIEW</h1>
+                            <div class="pv-meta">
+                                <div class="pv-timer-controls">
+                                    <button class="pv-timer-btn" id="pvTimerToggle" title="Start/Pause Timer">▶</button>
+                                    <button class="pv-timer-btn" id="pvTimerReset" title="Reset Timer">↺</button>
+                                </div>
+                                <span class="pv-timer" id="pvTimer">00:00:00</span>
+                                <span class="pv-clock" id="pvClock"></span>
+                            </div>
+                        </div>
+
+                        <div class="pv-current-wrap">
+                            <span class="pv-label">Current Slide</span>
+                            <div class="pv-slide-frame">
+                                <iframe id="pvCurrentFrame" sandbox="allow-same-origin"></iframe>
+                            </div>
+                        </div>
+
+                        <div class="pv-notes-panel">
+                            <span class="pv-label">Speaker Notes</span>
+                            <div class="pv-notes" id="pvNotes"></div>
+                        </div>
+
+                        <div class="pv-bottom">
+                            <div class="pv-nav">
+                                <button class="pv-btn" id="pvPrev">← Prev</button>
+                                <span class="pv-slide-count" id="pvCount">1 / ${this.totalSlides}</span>
+                                <button class="pv-btn" id="pvNext">Next →</button>
+                            </div>
+                            <div class="pv-next-wrap">
+                                <span class="pv-next-label">Up Next</span>
+                                <div class="pv-next-frame">
+                                    <iframe id="pvNextFrame" sandbox="allow-same-origin"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                this.pvSlideData = slideData;
+                this.pvCurrent = 0;
+
+                this.setupPresenterIframes();
+                this.setupPresenterNav();
+                this.setupPresenterTimer();
+                this.setupPresenterClock();
+                this.setupPresenterChannel();
+                this.updatePresenterView();
+            }
+
+            buildSlideHTML(slideOuterHTML) {
+                return `<!DOCTYPE html><html><head>
+                    <meta charset="UTF-8">
+                    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@300;400;700;900&display=swap" rel="stylesheet">
+                    <style>${this.pvOriginalCSS}
+                    html { scroll-behavior: auto; }
+                    body { overflow:hidden; }
+                    .slide { position:relative; scroll-snap-align:none; }
+                    .slide.visible .reveal { opacity:1; transform:translateY(0); }
+                    .nav-dots, .progress-bar, .keyboard-hint { display:none !important; }
+                    </style></head><body>
+                    ${slideOuterHTML.replace(/class="slide /, 'class="slide visible ')}
+                    </body></html>`;
+            }
+
+            setupPresenterIframes() {
+                this.pvCurrentFrame = document.getElementById('pvCurrentFrame');
+                this.pvNextFrame = document.getElementById('pvNextFrame');
+            }
+
+            writeIframe(iframe, slideIndex) {
+                if (slideIndex < 0 || slideIndex >= this.pvSlideData.length) {
+                    iframe.srcdoc = `<html><body style="background:#0a0a0a;display:flex;align-items:center;justify-content:center;height:100vh;color:#333;font-family:Inter,sans-serif;"><p>End of presentation</p></body></html>`;
+                    return;
+                }
+                iframe.srcdoc = this.buildSlideHTML(this.pvSlideData[slideIndex].html);
+            }
+
+            updatePresenterView() {
+                this.writeIframe(this.pvCurrentFrame, this.pvCurrent);
+                this.writeIframe(this.pvNextFrame, this.pvCurrent + 1);
+                document.getElementById('pvNotes').textContent = this.pvSlideData[this.pvCurrent]?.notes || '';
+                document.getElementById('pvCount').textContent = `${this.pvCurrent + 1} / ${this.totalSlides}`;
+            }
+
+            setupPresenterNav() {
+                document.getElementById('pvPrev').addEventListener('click', () => this.presenterGo(this.pvCurrent - 1));
+                document.getElementById('pvNext').addEventListener('click', () => this.presenterGo(this.pvCurrent + 1));
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'ArrowRight' || e.key === 'ArrowDown' || e.key === ' ') {
+                        e.preventDefault();
+                        this.presenterGo(this.pvCurrent + 1);
+                    } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                        e.preventDefault();
+                        this.presenterGo(this.pvCurrent - 1);
+                    }
+                });
+            }
+
+            presenterGo(index) {
+                if (index < 0 || index >= this.totalSlides) return;
+                this.pvCurrent = index;
+                this.updatePresenterView();
+                this.channel.postMessage({ type: 'slide', index });
+            }
+
+            setupPresenterTimer() {
+                this.timerRunning = false;
+                this.timerSeconds = 0;
+                this.timerInterval = null;
+
+                document.getElementById('pvTimerToggle').addEventListener('click', () => {
+                    if (this.timerRunning) {
+                        clearInterval(this.timerInterval);
+                        this.timerRunning = false;
+                        document.getElementById('pvTimerToggle').textContent = '▶';
+                    } else {
+                        this.timerInterval = setInterval(() => {
+                            this.timerSeconds++;
+                            this.renderTimer();
+                        }, 1000);
+                        this.timerRunning = true;
+                        document.getElementById('pvTimerToggle').textContent = '⏸';
+                    }
+                });
+
+                document.getElementById('pvTimerReset').addEventListener('click', () => {
+                    this.timerSeconds = 0;
+                    this.renderTimer();
+                });
+            }
+
+            renderTimer() {
+                const h = String(Math.floor(this.timerSeconds / 3600)).padStart(2, '0');
+                const m = String(Math.floor((this.timerSeconds % 3600) / 60)).padStart(2, '0');
+                const s = String(this.timerSeconds % 60).padStart(2, '0');
+                document.getElementById('pvTimer').textContent = `${h}:${m}:${s}`;
+            }
+
+            setupPresenterClock() {
+                const update = () => {
+                    const now = new Date();
+                    document.getElementById('pvClock').textContent = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+                };
+                update();
+                setInterval(update, 10000);
+            }
+
+            setupPresenterChannel() {
+                this.channel.onmessage = (e) => {
+                    if (e.data.type === 'slide' && e.data.index !== this.pvCurrent) {
+                        this.pvCurrent = e.data.index;
+                        this.updatePresenterView();
+                    }
+                };
+            }
+
+            /* ==========================================
+               MAIN VIEW (unchanged logic below)
+               ========================================== */
+
+            createNavDots() {
+                const nav = document.getElementById('navDots');
+                this.slides.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.classList.add('nav-dot');
+                    if (i === 0) dot.classList.add('active');
+                    dot.setAttribute('aria-label', `Go to slide ${i + 1}`);
+                    dot.addEventListener('click', () => this.goToSlide(i));
+                    nav.appendChild(dot);
+                });
+                this.dots = nav.querySelectorAll('.nav-dot');
+            }
+
+            setupIntersectionObserver() {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach(entry => {
+                        if (entry.isIntersecting) {
+                            entry.target.classList.add('visible');
+                            const index = parseInt(entry.target.dataset.slide);
+                            this.currentSlide = index;
+                            this.updateNavDots();
+                            this.updateProgress();
+                            this.broadcastSlide(index);
+                        }
+                    });
+                }, { threshold: 0.5 });
+
+                this.slides.forEach(slide => observer.observe(slide));
+            }
+
+            setupKeyboardNav() {
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'p' || e.key === 'P') {
+                        e.preventDefault();
+                        this.openPresenterView();
+                        return;
+                    }
+                    if (e.key === 'ArrowDown' || e.key === 'ArrowRight' || e.key === ' ') {
+                        e.preventDefault();
+                        this.nextSlide();
+                    } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                        e.preventDefault();
+                        this.prevSlide();
+                    }
+                });
+            }
+
+            setupWheelNav() {
+                let lastWheel = 0;
+                document.addEventListener('wheel', (e) => {
+                    const now = Date.now();
+                    if (now - lastWheel < 800) return;
+                    lastWheel = now;
+
+                    if (e.deltaY > 0) this.nextSlide();
+                    else if (e.deltaY < 0) this.prevSlide();
+                }, { passive: true });
+            }
+
+            setupTouchNav() {
+                let touchStartY = 0;
+                document.addEventListener('touchstart', (e) => {
+                    touchStartY = e.touches[0].clientY;
+                }, { passive: true });
+
+                document.addEventListener('touchend', (e) => {
+                    const diff = touchStartY - e.changedTouches[0].clientY;
+                    if (Math.abs(diff) > 50) {
+                        if (diff > 0) this.nextSlide();
+                        else this.prevSlide();
+                    }
+                }, { passive: true });
+            }
+
+            openPresenterView() {
+                const url = window.location.pathname + '?presenter';
+                window.open(url, 'presenter', 'width=1200,height=800');
+            }
+
+            goToSlide(index, broadcast = true) {
+                if (index < 0 || index >= this.totalSlides) return;
+                this.slides[index].scrollIntoView({ behavior: 'smooth' });
+                this.currentSlide = index;
+                this.updateNavDots();
+                this.updateProgress();
+                if (broadcast) this.broadcastSlide(index);
+            }
+
+            nextSlide() {
+                this.goToSlide(this.currentSlide + 1);
+            }
+
+            prevSlide() {
+                this.goToSlide(this.currentSlide - 1);
+            }
+
+            updateNavDots() {
+                this.dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === this.currentSlide);
+                });
+            }
+
+            updateProgress() {
+                const progress = ((this.currentSlide + 1) / this.totalSlides) * 100;
+                document.getElementById('progress').style.width = `${progress}%`;
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            new SlidePresentation();
+        });
+    </script>
+</body>
+</html>
